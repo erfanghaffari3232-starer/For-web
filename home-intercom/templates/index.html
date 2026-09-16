@@ -3,34 +3,180 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>سانترال خانگی آزمایشی</title>
+<title>تلفن داخلی خانه</title>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <main class="card">
-<div class="badge">HOME PBX • TEST</div>
-<h1>☎️ سانترال خانگی</h1>
-<p>آزمایش داخلی بین اتاق و پذیرایی</p>
+<div class="badge">LAN INTERCOM • WEBRTC</div>
+<h1>☎️ تلفن داخلی خانه</h1>
+<p>تماس صوتی مستقیم بین اتاق و پذیرایی در شبکه داخلی</p>
+
 <div class="rooms">
-<button onclick="selectRoom('1')"><b>1</b><span>🛏️ اتاق</span><small id="s1">آفلاین</small></button>
-<button onclick="selectRoom('2')"><b>2</b><span>🛋️ پذیرایی</span><small id="s2">آفلاین</small></button>
+<button id="room1" onclick="startAs('1')"><b>1</b><span>🛏️ اتاق</span><small id="s1">انتخاب نشده</small></button>
+<button id="room2" onclick="startAs('2')"><b>2</b><span>🛋️ پذیرایی</span><small id="s2">انتخاب نشده</small></button>
 </div>
-<section id="panel" hidden>
-<h2 id="title"></h2>
-<p>داخلی مقصد:</p>
-<div class="dial">
-<button onclick="callRoom('1')">1<br><small>اتاق</small></button>
-<button onclick="callRoom('2')">2<br><small>پذیرایی</small></button>
+
+<section id="callPanel" hidden>
+<div class="myRoom" id="myRoom"></div>
+<div class="status" id="status">در حال اتصال...</div>
+<div class="actions">
+<button class="call" id="call1" onclick="callRoom('1')">📞 تماس با اتاق</button>
+<button class="call" id="call2" onclick="callRoom('2')">📞 تماس با پذیرایی</button>
 </div>
-<div id="message"></div>
+<div class="incoming" id="incoming" hidden>
+<strong id="incomingText">تماس ورودی</strong>
+<div class="incomingActions">
+<button onclick="answerCall()">✅ پاسخ</button>
+<button onclick="rejectCall()">❌ رد</button>
+</div>
+</div>
+<button class="hangup" onclick="hangup()">🔴 قطع تماس</button>
 </section>
-<footer>نسخه آزمایشی است و هنوز تماس صوتی واقعی ندارد.</footer>
+
+<audio id="remoteAudio" autoplay></audio>
+<footer>نسخه اصلی آزمایشی: صدای واقعی با WebRTC، بدون سرور تلفن و فقط داخل یک Wi‑Fi/LAN.</footer>
 </main>
+
 <script>
-let current=null;
-async function refresh(){const d=await fetch('/status').then(r=>r.json());s1.textContent=d['1'].online?'آنلاین':'آفلاین';s2.textContent=d['2'].online?'آنلاین':'آفلاین'}
-async function selectRoom(r){current=r;title.textContent='داخلی '+r+(r==='1'?' — اتاق':' — پذیرایی');panel.hidden=false;await fetch('/online/'+r,{method:'POST'});refresh()}
-function callRoom(r){if(!current)return;if(r===current){message.textContent='نمی‌توانی به همان داخلی زنگ بزنی.';return}message.textContent='📞 درخواست تماس به داخلی '+r+' ارسال شد.'}
-refresh();setInterval(refresh,2000)
+let myRoom = null;
+let ws = null;
+let pc = null;
+let localStream = null;
+let pendingOffer = null;
+let activeCall = false;
+
+const rtcConfig = { iceServers: [] };
+const $ = id => document.getElementById(id);
+
+function setStatus(text){ $('status').textContent = text; }
+function otherRoom(){ return myRoom === '1' ? '2' : '1'; }
+function roomName(r){ return r === '1' ? 'اتاق' : 'پذیرایی'; }
+
+async function startAs(room){
+  if (myRoom === room) return;
+  if (ws) ws.close();
+  myRoom = room;
+  $('callPanel').hidden = false;
+  $('myRoom').textContent = `دستگاه شما: داخلی ${room} — ${roomName(room)}`;
+  $('call1').disabled = room === '1';
+  $('call2').disabled = room === '2';
+  setStatus('در حال اتصال به مرکز داخلی...');
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+  } catch(e) {
+    setStatus('⚠️ دسترسی میکروفون داده نشد. اجازه Microphone را فعال کن.');
+    return;
+  }
+
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${room}`);
+  ws.onopen = () => { setStatus('🟢 آماده تماس'); };
+  ws.onclose = () => { if (myRoom) setStatus('اتصال داخلی قطع شد.'); };
+  ws.onerror = () => setStatus('خطا در اتصال داخلی');
+  ws.onmessage = async event => {
+    const msg = JSON.parse(event.data);
+    if (msg.type === 'presence') {
+      updatePresence(msg.room, msg.online);
+      return;
+    }
+    if (msg.type === 'call') {
+      pendingOffer = msg.offer;
+      $('incomingText').textContent = `📞 تماس از داخلی ${msg.from} — ${roomName(msg.from)}`;
+      $('incoming').hidden = false;
+      setStatus('📲 تماس ورودی');
+    }
+    if (msg.type === 'answer' && pc) {
+      await pc.setRemoteDescription(msg.answer);
+      setStatus('🟢 تماس برقرار شد');
+      activeCall = true;
+    }
+    if (msg.type === 'ice' && pc && msg.candidate) {
+      try { await pc.addIceCandidate(msg.candidate); } catch(e) {}
+    }
+    if (msg.type === 'hangup') {
+      cleanupCall();
+      setStatus('تماس قطع شد.');
+    }
+  };
+
+  fetch('/status').then(r=>r.json()).then(data=>{
+    updatePresence('1', data['1'].online);
+    updatePresence('2', data['2'].online);
+  });
+}
+
+function updatePresence(room, online){
+  $(room === '1' ? 's1' : 's2').textContent = online ? '🟢 آنلاین' : '⚪ آفلاین';
+}
+
+function send(data){
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({...data, to:otherRoom()}));
+}
+
+function makePeer(){
+  pc = new RTCPeerConnection(rtcConfig);
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  pc.ontrack = event => { $('remoteAudio').srcObject = event.streams[0]; };
+  pc.onicecandidate = event => { if(event.candidate) send({type:'ice', candidate:event.candidate}); };
+  pc.onconnectionstatechange = () => {
+    if (['connected','completed'].includes(pc.connectionState)) { activeCall = true; setStatus('🟢 تماس صوتی برقرار است'); }
+    if (['failed','disconnected','closed'].includes(pc.connectionState)) { setStatus('تماس پایان یافت.'); }
+  };
+}
+
+async function callRoom(room){
+  if (!myRoom || room === myRoom) return;
+  if (!$('s'+room).textContent.includes('آنلاین')) {
+    setStatus(`❌ داخلی ${room} آنلاین نیست.`);
+    return;
+  }
+  cleanupCall(false);
+  makePeer();
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  send({type:'call', offer:pc.localDescription});
+  setStatus(`📞 در حال تماس با داخلی ${room}...`);
+}
+
+async function answerCall(){
+  $('incoming').hidden = true;
+  cleanupCall(false);
+  makePeer();
+  await pc.setRemoteDescription(pendingOffer);
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  send({type:'answer', answer:pc.localDescription});
+  pendingOffer = null;
+  activeCall = true;
+  setStatus('🟢 تماس صوتی برقرار است');
+}
+
+function rejectCall(){
+  $('incoming').hidden = true;
+  pendingOffer = null;
+  send({type:'hangup'});
+  setStatus('تماس رد شد.');
+}
+
+function hangup(){
+  send({type:'hangup'});
+  cleanupCall();
+  setStatus('تماس قطع شد.');
+}
+
+function cleanupCall(sendHangup=true){
+  if (pc) { pc.ontrack=null; pc.onicecandidate=null; pc.close(); pc=null; }
+  $('remoteAudio').srcObject = null;
+  activeCall = false;
+  if (sendHangup) pendingOffer=null;
+}
+
+window.addEventListener('beforeunload', () => {
+  try { send({type:'hangup'}); } catch(e) {}
+  if (ws) ws.close();
+  if (localStream) localStream.getTracks().forEach(t=>t.stop());
+});
 </script>
-</body></html>
+</body>
+</html>
