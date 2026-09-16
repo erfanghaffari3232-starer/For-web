@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سانترال خانگی آزمایشی</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="card">
+<div class="badge">HOME PBX • TEST</div>
+<h1>☎️ سانترال خانگی</h1>
+<p>آزمایش داخلی بین اتاق و پذیرایی</p>
+<div class="rooms">
+<button onclick="selectRoom('1')"><b>1</b><span>🛏️ اتاق</span><small id="s1">آفلاین</small></button>
+<button onclick="selectRoom('2')"><b>2</b><span>🛋️ پذیرایی</span><small id="s2">آفلاین</small></button>
+</div>
+<section id="panel" hidden>
+<h2 id="title"></h2>
+<p>داخلی مقصد:</p>
+<div class="dial">
+<button onclick="callRoom('1')">1<br><small>اتاق</small></button>
+<button onclick="callRoom('2')">2<br><small>پذیرایی</small></button>
+</div>
+<div id="message"></div>
+</section>
+<footer>نسخه آزمایشی است و هنوز تماس صوتی واقعی ندارد.</footer>
+</main>
+<script>
+let current=null;
+async function refresh(){const d=await fetch('/status').then(r=>r.json());s1.textContent=d['1'].online?'آنلاین':'آفلاین';s2.textContent=d['2'].online?'آنلاین':'آفلاین'}
+async function selectRoom(r){current=r;title.textContent='داخلی '+r+(r==='1'?' — اتاق':' — پذیرایی');panel.hidden=false;await fetch('/online/'+r,{method:'POST'});refresh()}
+function callRoom(r){if(!current)return;if(r===current){message.textContent='نمی‌توانی به همان داخلی زنگ بزنی.';return}message.textContent='📞 درخواست تماس به داخلی '+r+' ارسال شد.'}
+refresh();setInterval(refresh,2000)
+</script>
+</body></html>
