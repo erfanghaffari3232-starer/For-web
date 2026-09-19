@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": 1,
+      "text": "ESP32 projects can use GPIO, PWM, ADC, I2C, SPI, UART, Wi-Fi and Bluetooth."
+    },
+    {
+      "id": 2,
+      "text": "Common IoT flow: sensor -> microcontroller -> processing -> network -> dashboard or actuator."
+    },
+    {
+      "id": 3,
+      "text": "I2C commonly uses SDA and SCL lines and device addresses; always check the hardware documentation."
+    },
+    {
+      "id": 4,
+      "text": "PWM can control LED brightness, motor speed or servo-related signals depending on hardware."
+    },
+    {
+      "id": 5,
+      "text": "MicroBlocks uses visual blocks to control compatible boards and is useful for rapid hardware experiments."
+    },
+    {
+      "id": 6,
+      "text": "Arduino sketches commonly contain setup and loop functions and use libraries for sensors and displays."
+    }
+  ]
+}
