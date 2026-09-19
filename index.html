@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Erfan AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at top,#153653,#07111d 55%);color:#eef7ff;height:100vh;display:flex;align-items:center;justify-content:center}.app{width:min(1050px,96vw);height:min(850px,94vh);background:#0b1724ee;border:1px solid #2b4962;border-radius:25px;box-shadow:0 25px 80px #0009;display:flex;flex-direction:column;overflow:hidden}.top{padding:18px 22px;border-bottom:1px solid #29445d;display:flex;align-items:center;gap:14px}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#4ecca3,#37a8df);color:#06151b;display:grid;place-items:center;font-size:26px;font-weight:900}.top h1{margin:0;font-size:21px}.top p{margin:4px 0 0;color:#91a8bb;font-size:12px}.chat{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px}.m{max-width:84%;padding:13px 16px;border-radius:18px;line-height:1.9;white-space:pre-wrap}.u{align-self:flex-start;background:#155078;border-bottom-left-radius:5px}.b{align-self:flex-end;background:#142637;border:1px solid #29445d;border-bottom-right-radius:5px}.bottom{border-top:1px solid #29445d;padding:13px;display:flex;gap:10px}.bottom textarea{flex:1;resize:none;height:58px;border:1px solid #36536b;background:#07121e;color:#fff;border-radius:15px;padding:12px;font:inherit;outline:none}.bottom button{width:95px;border:0;border-radius:15px;background:#4ecca3;color:#06151b;font-weight:bold;cursor:pointer}.tools{display:flex;gap:7px;padding:0 14px 10px}.tools button{background:#13283a;color:#b9d0df;border:1px solid #29445d;border-radius:10px;padding:7px 11px;cursor:pointer}.typing{opacity:.7}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div class="logo">E</div><div><h1>Erfan AI</h1><p>چت‌بات رایگان • دانش داخلی • بدون API پولی</p></div></div>
+<div id="chat" class="chat"></div>
+<div class="tools"><button onclick="clearChat()">پاک کردن گفتگو</button><button onclick="showTopics()">موضوعات</button></div>
+<div class="bottom"><textarea id="q" placeholder="هر چیزی می‌خواهی بپرس..." onkeydown="key(event)"></textarea><button onclick="send()">ارسال</button></div>
+</div>
+<script>
+const KB=[
+["سلام|درود|hello|hi","سلام! 👋 من Erfan AI هستم. سؤال‌ات را بپرس؛ درباره برنامه‌نویسی و موضوعات عمومی می‌توانم از دانش داخلی خودم کمک بگیرم."],
+["html|اچ تی ام ال","HTML ساختار صفحهٔ وب را مشخص می‌کند. تگ‌های رایج: html، head، body، h1، p، div، a، img، form، input و button."],
+["css|سی اس اس","CSS برای ظاهر صفحه است: رنگ، فونت، فاصله، اندازه، Flexbox، Grid، انیمیشن و واکنش‌گرایی."],
+["javascript|جاوااسکریپت|js","JavaScript منطق و تعامل صفحه را کنترل می‌کند؛ متغیر، تابع، شرط، حلقه، DOM، Event، Promise و fetch از مفاهیم مهم آن هستند."],
+["python|پایتون","Python زبانی خوانا و چندمنظوره است و در وب، اتوماسیون، داده، هوش مصنوعی و اسکریپت‌نویسی استفاده می‌شود."],
+["flutter","Flutter فریم‌ورک ساخت رابط کاربری چندسکویی است و معمولاً با Dart استفاده می‌شود."],
+["dart","Dart زبان برنامه‌نویسی Flutter است؛ متغیر، کلاس، تابع، Future و async/await از مفاهیم مهم آن هستند."],
+["app inventor|اپ اینونتور","MIT App Inventor برای ساخت اپ با بلوک‌هاست. Designer ظاهر را می‌سازد و Blocks منطق برنامه را تعیین می‌کند."],
+["github|گیت هاب","GitHub برای میزبانی Git، همکاری روی پروژه و انتشار سایت با GitHub Pages استفاده می‌شود."],
+["git","Git سیستم کنترل نسخه است. دستورهای رایج: git init، git add، git commit، git branch، git pull و git push."],
+["wordpress|وردپرس","WordPress سیستم مدیریت محتواست. قالب ظاهر سایت را تعیین می‌کند و افزونه قابلیت‌های جدید اضافه می‌کند."],
+["esp32","ESP32 یک میکروکنترلر با Wi‑Fi و Bluetooth است و برای IoT، سنسورها و کنترل شبکه‌ای مناسب است."],
+["arduino|آردوینو","Arduino یک پلتفرم محبوب برای پروژه‌های الکترونیکی و آموزشی است؛ برد و محیط برنامه‌نویسی آن برای کنترل سنسور و عملگر استفاده می‌شود."],
+["microblocks|میکروبلاکس","MicroBlocks محیط برنامه‌نویسی بلوکی برای کنترل سخت‌افزار است و برای یادگیری و پروژه‌های تعاملی کاربرد دارد."],
+["api","API راه ارتباطی بین نرم‌افزارهاست؛ یک برنامه درخواست می‌فرستد و سرویس می‌تواند داده یا نتیجه برگرداند."],
+["json","JSON قالب متنی رایج برای تبادل داده است؛ داده‌ها به صورت object و array و مقدارهایی مثل string و number نمایش داده می‌شوند."],
+["http","HTTP پروتکل درخواست/پاسخ وب است. روش‌های رایج GET، POST، PUT، PATCH و DELETE هستند."],
+["https","HTTPS نسخهٔ امن HTTP است و ارتباط بین مرورگر و سرور را با TLS رمزنگاری می‌کند."],
+["fetch","fetch در JavaScript برای ارسال درخواست شبکه استفاده می‌شود و معمولاً با Promise و async/await همراه است."],
+["dom","DOM نمایش ساختاری صفحه در مرورگر است. JavaScript می‌تواند عناصر را پیدا کند، تغییر دهد، بسازد یا حذف کند."],
+["sql","SQL برای کار با پایگاه داده‌های رابطه‌ای است. SELECT، INSERT، UPDATE و DELETE از دستورهای پایه‌اند."],
+["database|دیتابیس|پایگاه داده","پایگاه داده برای ذخیره و بازیابی اطلاعات ساختاریافته استفاده می‌شود؛ نمونه‌ها MySQL، PostgreSQL و SQLite هستند."],
+["ai|هوش مصنوعی","هوش مصنوعی به روش‌هایی گفته می‌شود که سیستم‌ها را قادر به انجام کارهایی مانند تشخیص الگو، تولید محتوا و پردازش زبان می‌کند."],
+["machine learning|یادگیری ماشین","یادگیری ماشین شاخه‌ای از هوش مصنوعی است که در آن مدل از داده برای یادگیری الگو و انجام پیش‌بینی یا طبقه‌بندی استفاده می‌کند."],
+["neural network|شبکه عصبی","شبکه عصبی مدلی محاسباتی با لایه‌ها و وزن‌هاست که می‌تواند الگوهای پیچیده را از داده یاد بگیرد."],
+["algorithm|الگوریتم","الگوریتم مجموعه‌ای مرحله‌به‌مرحله از دستورها برای حل یک مسئله است."],
+["variable|متغیر","متغیر نامی برای نگهداری یک مقدار است؛ مقدار آن می‌تواند در طول اجرای برنامه تغییر کند، بسته به زبان."],
+["function|تابع","تابع بخشی از کد است که برای انجام یک کار مشخص تعریف می‌شود و می‌تواند ورودی و خروجی داشته باشد."],
+["loop|حلقه","حلقه برای تکرار یک بخش از برنامه استفاده می‌شود؛ for و while نمونه‌های رایج هستند."],
+["if|شرط","دستور شرطی اجازه می‌دهد برنامه بر اساس درست یا غلط بودن یک شرط مسیر متفاوتی اجرا کند."],
+["windows|ویندوز","Windows سیستم‌عامل مایکروسافت برای رایانه‌هاست و ابزارهایی مثل File Explorer، PowerShell و Task Manager دارد."],
+["linux|لینوکس","Linux خانواده‌ای از سیستم‌عامل‌های متن‌باز مبتنی بر هسته Linux است و در سرورها و رایانه‌ها کاربرد گسترده دارد."],
+["android|اندروید","Android سیستم‌عامل موبایل است و اپ‌های آن معمولاً با ابزارهایی مانند Android Studio توسعه داده می‌شوند."],
+["network|شبکه|شبکه کامپیوتری","شبکه مجموعه‌ای از دستگاه‌های متصل برای تبادل داده است. IP، DNS، router و HTTP از مفاهیم پایه‌اند."],
+["wifi|وای فای","Wi‑Fi فناوری شبکهٔ بی‌سیم محلی است که دستگاه‌ها را برای تبادل داده به شبکه متصل می‌کند."],
+["dns","DNS نام دامنه را به اطلاعاتی مانند آدرس IP تبدیل می‌کند تا مرورگر بتواند سرور مقصد را پیدا کند."],
+["ip","IP یک نشانی برای شناسایی یک رابط یا دستگاه در شبکه است؛ IPv4 و IPv6 دو نسخهٔ رایج‌اند."],
+["security|امنیت|هک","امنیت سایبری شامل محافظت از حساب‌ها، دستگاه‌ها، شبکه‌ها و داده‌هاست. برای یادگیری امنیت باید روی سیستم‌های خودت یا محیط‌های آزمایش مجاز کار کنی."],
+["password|پسورد|رمز عبور","رمز عبور قوی باید طول مناسب داشته باشد و بهتر است برای هر حساب جدا باشد. استفاده از مدیر رمز عبور و احراز هویت دومرحله‌ای هم کمک می‌کند."],
+["programming|برنامه نویسی|برنامه‌نویسی","برنامه‌نویسی یعنی نوشتن دستورهایی که رایانه اجرا می‌کند. HTML/CSS/JS برای وب، Python برای کاربردهای مختلف و Dart/Flutter برای اپ گزینه‌های رایج هستند."],
+["website|سایت|وب سایت","یک سایت معمولاً از HTML برای ساختار، CSS برای ظاهر و JavaScript برای تعامل تشکیل می‌شود و می‌تواند روی یک سرور میزبانی شود."],
+["frontend|فرانت اند","Front-end بخش قابل مشاهدهٔ یک سایت یا اپ وب است؛ HTML، CSS و JavaScript پایه‌های رایج آن هستند."],
+["backend|بک اند","Back-end بخش سمت سرور است که منطق، احراز هویت، API و ارتباط با دیتابیس را مدیریت می‌کند."],
+["responsive|ریسپانسیو","طراحی Responsive باعث می‌شود رابط در اندازه‌های مختلف صفحه، مثل موبایل و دسکتاپ، مناسب نمایش داده شود."],
+["error|خطا|ارور","برای پیدا کردن خطا، متن کامل خطا را بخوان، خطی که خطا در آن رخ داده را بررسی کن و مسئله را به کوچک‌ترین بخش قابل آزمایش تقسیم کن."],
+["help|کمک|چی بلدی|چه چیزهایی بلدی","من می‌توانم در این پروژه درباره موضوعات برنامه‌نویسی، وب، Git/GitHub، Flutter، App Inventor، ESP32، شبکه و مفاهیم عمومی آموزش بدهم. این نسخه به مدل آنلاین وصل نیست و بنابراین دانش آن محدود به پایگاه داخلی همین فایل است."],
+["تو کی هستی|اسمت چیه|اسم تو","من Erfan AI هستم؛ یک چت‌بات رایگان که برای این سایت با JavaScript ساخته شده‌ام."],
+["پول|هزینه|رایگان","این نسخه برای اجرا به API پولی نیاز ندارد و کاملاً با JavaScript داخل مرورگر کار می‌کند؛ البته پاسخ‌هایش محدود به دانش داخلی فایل است."],
+["ممنون|مرسی|تشکر","خواهش می‌کنم! 😄"]
+];
+
+function norm(s){return s.toLowerCase().replace(/[؟?!.,،؛:()\[\]{}]/g," ").replace(/\s+/g," ").trim()}
+function findAnswer(q){
+ const n=norm(q); let best=null,score=0;
+ for(const [keys,a] of KB){
+   let s=0;
+   for(const k of keys.split("|")){const x=norm(k); if(x&&n.includes(x)) s+=x.length>3?2:1}
+   if(s>score){score=s;best=a}
+ }
+ if(best)return best;
+ if(/چطور|چگونه|آموزش|بساز|ساخت/.test(n))
+   return "حتماً. موضوع را دقیق‌تر بگو؛ مثلاً «چطور یک API با JavaScript بسازم؟» تا راهنمای مرحله‌به‌مرحله بدهم.";
+ return "این سؤال در پایگاه دانش فعلی من نیست. اگر سؤال را دقیق‌تر بنویسی، شاید بتوانم با یکی از موضوعات داخلی مرتبطش کنم.\n\nنکته: برای پاسخ به «همه چیز» مثل یک مدل زبانی واقعی، باید یک مدل هوش مصنوعی جداگانه اجرا یا به API متصل شود.";
+}
+function add(t,c){const d=document.createElement("div");d.className="m "+c;d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+function send(){const q=document.getElementById("q");const t=q.value.trim();if(!t)return;add(t,"u");q.value="";const d=document.createElement("div");d.className="m b typing";d.textContent="در حال فکر کردن...";chat.appendChild(d);setTimeout(()=>{d.classList.remove("typing");d.textContent=findAnswer(t);chat.scrollTop=chat.scrollHeight},250)}
+function key(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}
+function clearChat(){chat.innerHTML="";add("گفتگو پاک شد. 👋 دوباره شروع کنیم؟","b")}
+function showTopics(){add("موضوعات داخلی من:\nHTML • CSS • JavaScript • Python • Flutter • Dart • App Inventor • GitHub • Git • WordPress • ESP32 • Arduino • MicroBlocks • API • JSON • HTTP • SQL • دیتابیس • AI • شبکه • Wi‑Fi • DNS • IP • امنیت • Windows • Android و مفاهیم برنامه‌نویسی","b")}
+add("سلام! 👋\nمن Erfan AI هستم. رایگانم و برای کار کردن به API پولی نیاز ندارم.\n\nمثلاً بپرس: «API چیست؟» یا «چطور با JavaScript سایت بسازم؟»","b");
+</script>
+</body>
+</html>
