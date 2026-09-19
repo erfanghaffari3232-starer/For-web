@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": 1,
+      "text": "Git workflow: edit files, git status, git add, git commit, git pull, then git push."
+    },
+    {
+      "id": 2,
+      "text": "Git branches allow isolated lines of development and can be merged later."
+    },
+    {
+      "id": 3,
+      "text": "GitHub Pages can publish static HTML, CSS and JavaScript sites from a repository."
+    },
+    {
+      "id": 4,
+      "text": "WordPress themes control presentation while plugins add or modify functionality."
+    },
+    {
+      "id": 5,
+      "text": "WordPress troubleshooting often starts by checking the exact error, plugin/theme compatibility, PHP version and logs."
+    },
+    {
+      "id": 6,
+      "text": "JSON should be valid UTF-8 text and can be loaded in JavaScript with fetch and response.json()."
+    }
+  ]
+}
