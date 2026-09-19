@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": 1,
+      "text": "HTML elements: html, head, body, title, meta, header, nav, main, section, article, aside, footer, h1-h6, p, a, img, video, audio, form, label, input, textarea, select, option, button, table, ul, ol, li, details, dialog."
+    },
+    {
+      "id": 2,
+      "text": "CSS concepts: selectors, specificity, inheritance, cascade, box model, margin, padding, border, display, position, flexbox, grid, media queries, transitions, transforms, keyframes, variables."
+    },
+    {
+      "id": 3,
+      "text": "JavaScript concepts: let, const, var, string, number, bigint, boolean, null, undefined, symbol, array, object, destructuring, spread, map, filter, reduce, find, class, module, import, export."
+    },
+    {
+      "id": 4,
+      "text": "Browser APIs: DOM, localStorage, sessionStorage, URL, Clipboard, Fetch, WebSocket, Canvas, Notifications and Geolocation with user permission."
+    },
+    {
+      "id": 5,
+      "text": "HTTP status examples: 200 success, 201 created, 204 no content, 400 bad request, 401 unauthorized, 403 forbidden, 404 not found, 429 too many requests, 500 server error."
+    },
+    {
+      "id": 6,
+      "text": "Web accessibility: semantic HTML, labels, keyboard navigation, alt text, focus visibility and readable contrast."
+    },
+    {
+      "id": 7,
+      "text": "Responsive web design: viewport meta, flexible widths, CSS media queries, relative units, responsive images and mobile-first layout."
+    },
+    {
+      "id": 8,
+      "text": "Frontend architecture: components, state, routing, forms, validation, loading states, error states and API clients."
+    }
+  ]
+}
