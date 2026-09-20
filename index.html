@@ -4,39 +4,32 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Erfan AI</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at top,#153653,#07111d 55%);color:#eef7ff;height:100vh;display:flex;align-items:center;justify-content:center}.app{width:min(1050px,96vw);height:min(850px,94vh);background:#0b1724ee;border:1px solid #2b4962;border-radius:25px;box-shadow:0 25px 80px #0009;display:flex;flex-direction:column;overflow:hidden}.top{padding:18px 22px;border-bottom:1px solid #29445d;display:flex;align-items:center;gap:14px}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#4ecca3,#37a8df);color:#06151b;display:grid;place-items:center;font-size:26px;font-weight:900}.top h1{margin:0;font-size:21px}.top p{margin:4px 0 0;color:#91a8bb;font-size:12px}.chat{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px}.m{max-width:84%;padding:13px 16px;border-radius:18px;line-height:1.9;white-space:pre-wrap}.u{align-self:flex-start;background:#155078;border-bottom-left-radius:5px}.b{align-self:flex-end;background:#142637;border:1px solid #29445d;border-bottom-right-radius:5px}.bottom{border-top:1px solid #29445d;padding:13px;display:flex;gap:10px}.bottom textarea{flex:1;resize:none;height:58px;border:1px solid #36536b;background:#07121e;color:#fff;border-radius:15px;padding:12px;font:inherit;outline:none}.bottom button{width:95px;border:0;border-radius:15px;background:#4ecca3;color:#06151b;font-weight:bold;cursor:pointer}.tools{display:flex;gap:7px;padding:0 14px 10px}.tools button{background:#13283a;color:#b9d0df;border:1px solid #29445d;border-radius:10px;padding:7px 11px;cursor:pointer}.typing{opacity:.7}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at top,#153653,#07111d 55%);color:#eef7ff;min-height:100vh;display:flex;align-items:center;justify-content:center}.app{width:min(1050px,96vw);height:min(850px,94vh);background:#0b1724ee;border:1px solid #2b4962;border-radius:25px;box-shadow:0 25px 80px #0009;display:flex;flex-direction:column;overflow:hidden}.top{padding:18px 22px;border-bottom:1px solid #29445d;display:flex;align-items:center;gap:14px}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#4ecca3,#37a8df);color:#06151b;display:grid;place-items:center;font-size:26px;font-weight:900}.top h1{margin:0;font-size:21px}.top p{margin:4px 0 0;color:#91a8bb;font-size:12px}.auth{padding:18px;border-bottom:1px solid #29445d;background:#091522}.auth-row{display:flex;gap:8px;flex-wrap:wrap}.auth input{flex:1;min-width:210px;border:1px solid #36536b;background:#07121e;color:#fff;border-radius:12px;padding:11px;font:inherit;outline:none}.auth button{border:0;border-radius:12px;background:#4ecca3;color:#06151b;font-weight:bold;padding:10px 15px;cursor:pointer}.auth button.alt{background:#183149;color:#cfe0eb;border:1px solid #36536b}.status{font-size:12px;color:#9fb4c4;margin-top:9px;min-height:18px}.verify{display:none;margin-top:10px;gap:8px}.verify input{max-width:180px;text-align:center;letter-spacing:5px}.chat{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:14px}.m{max-width:84%;padding:13px 16px;border-radius:18px;line-height:1.9;white-space:pre-wrap}.u{align-self:flex-start;background:#155078;border-bottom-left-radius:5px}.b{align-self:flex-end;background:#142637;border:1px solid #29445d;border-bottom-right-radius:5px}.bottom{border-top:1px solid #29445d;padding:13px;display:flex;gap:10px}.bottom textarea{flex:1;resize:none;height:58px;border:1px solid #36536b;background:#07121e;color:#fff;border-radius:15px;padding:12px;font:inherit;outline:none}.bottom button{width:95px;border:0;border-radius:15px;background:#4ecca3;color:#06151b;font-weight:bold;cursor:pointer}.tools{display:flex;gap:7px;padding:0 14px 10px}.tools button{background:#13283a;color:#b9d0df;border:1px solid #29445d;border-radius:10px;padding:7px 11px;cursor:pointer}.typing{opacity:.7}.locked{opacity:.55}
 </style></head><body>
-<div class="app"><div class="top"><div class="logo">E</div><div><h1>Erfan AI</h1><p>چت‌بات رایگان • پایگاه دانش چندفایلی • بدون API پولی</p></div></div>
-<div id="chat" class="chat"></div><div class="tools"><button onclick="clearChat()">پاک کردن گفتگو</button><button onclick="showTopics()">موضوعات</button></div>
-<div class="bottom"><textarea id="q" placeholder="هر چیزی می‌خواهی بپرس..." onkeydown="key(event)"></textarea><button onclick="send()">ارسال</button></div></div>
-<script>
+<div class="app"><div class="top"><div class="logo">E</div><div><h1>Erfan AI</h1><p>چت‌بات رایگان • ورود با تأیید ایمیل</p></div></div>
+<section class="auth"><div class="auth-row"><input id="email" type="email" placeholder="ایمیل خودت را وارد کن"><button onclick="sendCode()">ارسال کد تأیید</button><button class="alt" onclick="signOut()">خروج</button></div>
+<div id="verify" class="verify"><input id="otp" inputmode="numeric" maxlength="6" placeholder="کد ۶ رقمی"><button onclick="verifyCode()">تأیید کد</button><button class="alt" onclick="sendCode()">ارسال دوباره</button></div>
+<div id="status" class="status">برای ورود، ایمیل خودت را تأیید کن.</div></section>
+<div id="chat" class="chat locked"></div><div class="tools"><button onclick="clearChat()">پاک کردن گفتگو</button><button onclick="showTopics()">موضوعات</button></div>
+<div class="bottom"><textarea id="q" placeholder="بعد از تأیید ایمیل سؤال بپرس..." onkeydown="key(event)"></textarea><button onclick="send()">ارسال</button></div></div>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const SUPABASE_URL="YOUR_SUPABASE_URL",SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY";
+const configured=!SUPABASE_URL.startsWith("YOUR_")&&!SUPABASE_ANON_KEY.startsWith("YOUR_");
+const supabase=configured?createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const files=["knowledge/core.json","knowledge/web.json","knowledge/programming.json","knowledge/mobile.json","knowledge/iot.json","knowledge/backend.json","knowledge/tools.json"];
-let KB=[];
-const fallback=[
-["سلام|درود|hello|hi","سلام! 👋 من Erfan AI هستم. پایگاه دانش من حالا چندفایلی و بزرگ‌تر شده است."],
-["کمک|چی بلدی|چه چیزهایی بلدی","من درباره برنامه‌نویسی، وب، موبایل، Git/GitHub، API، دیتابیس، AI، شبکه، ESP32، Arduino، MicroBlocks و ابزارهای نرم‌افزاری اطلاعات داخلی دارم."],
-["تو کی هستی|اسمت چیه|اسم تو","من Erfan AI هستم؛ یک چت‌بات رایگان سمت مرورگر با پایگاه دانش داخلی."],
-["رایگان|پول|هزینه","این نسخه برای پایگاه دانش داخلی به API پولی نیاز ندارد."],
-["ممنون|مرسی|تشکر","خواهش می‌کنم! 😄"]
-];
+let KB=[];const fallback=[["سلام|درود|hello|hi","سلام! 👋 من Erfan AI هستم."],["کمک|چی بلدی|چه چیزهایی بلدی","من درباره برنامه‌نویسی، وب، موبایل، Git/GitHub، API، دیتابیس، AI، شبکه، ESP32، Arduino، MicroBlocks و ابزارهای نرم‌افزاری اطلاعات داخلی دارم."],["تو کی هستی|اسمت چیه|اسم تو","من Erfan AI هستم؛ یک چت‌بات رایگان با پایگاه دانش داخلی."],["رایگان|پول|هزینه","این نسخه برای پایگاه دانش داخلی به API پولی نیاز ندارد."],["ممنون|مرسی|تشکر","خواهش می‌کنم! 😄"]];
+const chat=document.getElementById("chat"),status=document.getElementById("status"),verifyBox=document.getElementById("verify");
 function norm(s){return String(s).toLowerCase().replace(/[؟?!.,،؛:()\[\]{}]/g," ").replace(/\s+/g," ").trim()}
-async function loadKB(){
-  const all=[];
-  for(const file of files){try{const r=await fetch(file);if(r.ok){const j=await r.json();if(j.topics)j.topics.forEach(x=>all.push([x.topic,x.info]));if(j.entries)j.entries.forEach(x=>all.push([x.text,x.text]))}}catch(e){}}
-  KB=all.length?all:fallback;
-  add("پایگاه دانش بارگذاری شد ✅\n"+KB.length+" ورودی آماده است. سؤال‌ات را بپرس!","b");
-}
-function findAnswer(q){
- const n=norm(q);let best=null,score=0;
- for(const [keys,a] of KB.concat(fallback)){let s=0;for(const k of norm(keys).split(/[|،,]/)){if(k&&n.includes(k))s+=k.length>3?2:1}if(s>score){score=s;best=a}}
- if(best&&score>0)return best;
- if(/چطور|چگونه|آموزش|بساز|ساخت/.test(n))return "حتماً! موضوع را دقیق‌تر بنویس تا از پایگاه دانش مرتبط‌ترین بخش را پیدا کنم.";
- return "برای این سؤال هنوز پاسخ مستقیمی در پایگاه دانش من پیدا نشد. سؤال را با چند کلمهٔ کلیدی دیگر امتحان کن.";
-}
+async function loadKB(){const all=[];for(const file of files){try{const r=await fetch(file);if(r.ok){const j=await r.json();if(j.topics)j.topics.forEach(x=>all.push([x.topic,x.info]));if(j.entries)j.entries.forEach(x=>all.push([x.text,x.text]))}}catch(e){}}KB=all.length?all:fallback;add("پایگاه دانش بارگذاری شد ✅\n"+KB.length+" ورودی آماده است.","b")}
+function findAnswer(q){const n=norm(q);let best=null,score=0;for(const [keys,a] of KB.concat(fallback)){let s=0;for(const k of keys.split(/[|،,]/)){const x=norm(k);if(x&&n.includes(x))s+=x.length>3?2:1}if(s>score){score=s;best=a}}return best&&score>0?best:"برای این سؤال هنوز پاسخ مستقیمی در پایگاه دانش پیدا نشد. سؤال را با چند کلمهٔ کلیدی دیگر امتحان کن."}
 function add(t,c){const d=document.createElement("div");d.className="m "+c;d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
-function send(){const q=document.getElementById("q"),t=q.value.trim();if(!t)return;add(t,"u");q.value="";const d=document.createElement("div");d.className="m b typing";d.textContent="در حال جست‌وجو در دانش...";chat.appendChild(d);setTimeout(()=>{d.classList.remove("typing");d.textContent=findAnswer(t);chat.scrollTop=chat.scrollHeight},120)}
-function key(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}
-function clearChat(){chat.innerHTML="";add("گفتگو پاک شد. 👋","b")}
-function showTopics(){add("موضوعات: HTML، CSS، JavaScript، Python، Git، GitHub، API، JSON، HTTP، SQL، دیتابیس، Flutter، Dart، App Inventor، WordPress، ESP32، Arduino، MicroBlocks، AI، شبکه، امنیت، Backend و Web.","b")}
-add("سلام! 👋\nمن Erfan AI هستم. دارم پایگاه دانش چندفایلی را بارگذاری می‌کنم...","b");loadKB();
+function setLocked(v){chat.classList.toggle("locked",!v);document.getElementById("q").disabled=!v;document.querySelector(".bottom button").disabled=!v}
+async function sendCode(){const email=document.getElementById("email").value.trim();if(!email)return status.textContent="اول ایمیل را وارد کن.";if(!configured)return status.textContent="Supabase هنوز تنظیم نشده؛ URL و Anon Key را در index.html وارد کن.";status.textContent="در حال ارسال کد...";const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)return status.textContent="خطا: "+error.message;verifyBox.style.display="flex";status.textContent="کد ۶ رقمی به ایمیل فرستاده شد."}
+async function verifyCode(){const email=document.getElementById("email").value.trim(),token=document.getElementById("otp").value.trim();if(!email||token.length!==6)return status.textContent="ایمیل و کد ۶ رقمی را درست وارد کن.";const {error}=await supabase.auth.verifyOtp({email,token,type:"email"});if(error)return status.textContent="کد نادرست یا منقضی شده است.";status.textContent="ایمیل تأیید شد ✅ ورود موفق بود.";verifyBox.style.display="none";setLocked(true)}
+async function signOut(){if(supabase)await supabase.auth.signOut();setLocked(false);status.textContent="خارج شدی. برای ورود دوباره ایمیل را تأیید کن."}
+function send(){if(document.getElementById("q").disabled)return;const q=document.getElementById("q"),t=q.value.trim();if(!t)return;add(t,"u");q.value="";const d=document.createElement("div");d.className="m b typing";d.textContent="در حال جست‌وجو...";chat.appendChild(d);setTimeout(()=>{d.classList.remove("typing");d.textContent=findAnswer(t);chat.scrollTop=chat.scrollHeight},120)}
+function key(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}function clearChat(){chat.innerHTML="";add("گفتگو پاک شد. 👋","b")}function showTopics(){add("موضوعات: HTML، CSS، JavaScript، Python، Git، GitHub، API، JSON، HTTP، SQL، دیتابیس، Flutter، Dart، App Inventor، WordPress، ESP32، Arduino، MicroBlocks، AI، شبکه، امنیت، Backend و Web.","b")}
+async function init(){add("سلام! 👋\nErfan AI آماده است. ابتدا ایمیل را تأیید کن.","b");await loadKB();if(!configured)status.textContent="⚙️ مرحله بعد: SUPABASE_URL و SUPABASE_ANON_KEY را وارد کن.";else{const {data}=await supabase.auth.getSession();if(data.session){setLocked(true);status.textContent="ایمیل شما قبلاً تأیید شده است ✅"}}}
+setLocked(false);init();Object.assign(window,{sendCode,verifyCode,signOut,send,key,clearChat,showTopics});
 </script></body></html>
